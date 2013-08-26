@@ -1,0 +1,9 @@
+{
+ "id": "mysql_server",
+ "package_file": "mysql-server",
+ "conf_dir": "/etc/mysql",
+ "port": "9000",
+ "data_dir": "/var/lib/mysqloenglish",
+ "max_conn": "5000",
+ "conn_timeo": "60"
+}
