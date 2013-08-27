@@ -10,6 +10,7 @@
 #Updating apt-packages 
 
 if platform_family?("debian")
+
 	execute "apt-get-update" do
   		command "apt-get update"
   		ignore_failure true
@@ -20,6 +21,6 @@ if platform_family?("debian")
   		end
 	end
 
+	
 	include_recipe "mysql-server::client"
-
-end	
+end

@@ -26,23 +26,21 @@ if platform_family?("debian")
                 end
         end
 
-	#coping secret key file to be used for root passwd
-	cookbook_file "my_secret_key" do
-        	path "/tmp/my_secret_key"
-        	mode "0644"
-        	action :create
-	end
-
-	serverbag = Chef::DataBagItem.load("mysqlbag", "mysql_server")
-	mysql_secret = Chef::EncryptedDataBagItem.load_secret("#{serverbag['secret_path']}")
-	mysql_creds = Chef::EncryptedDataBagItem.load("passwords", "mysql", mysql_secret)
+	
+        cookbook_file "my_secret_key" do
+                backup 1
+                path "/tmp/my_secret_key"
+                owner "root"
+                group "root"
+                mode "0644"
+                action :create
+        end
 
 	template "/var/cache/local/preseeding/mysql-server.seed" do
 		source "mysql-server.seed.erb"
 		owner "root"
 		group "root"
 		mode "0600"
-		variables ({:mysql_root_pass => mysql_creds['root_pass']})
 		notifies :run, "execute[preseed mysql-server]", :immediately
 	end
 
@@ -54,7 +52,6 @@ if platform_family?("debian")
 
  	package serverbag['package_file'] do
                 action :install
-                notifies :start, "service[mysql]", :delayed
         end
 
 
@@ -76,7 +73,6 @@ if platform_family?("debian")
 		backup 1
 		action :create
 		notifies :run, "execute[reload apparmor]", :immediately
-		notifies :run, "execute[mysql_install_db]", :immediately
         end
 
         template "#{serverbag['conf_dir']}/my.cnf" do
@@ -86,7 +82,8 @@ if platform_family?("debian")
                 owner "mysql"
                 group "mysql"
                 mode "0600"
-        	notifies :restart, "service[mysql]", :immediately
+		notifies :run, "execute[mysql_install_db]", :immediately
+	   	notifies :start, "service[mysql]", :immediately
 	end
 	
 	service "mysql" do
