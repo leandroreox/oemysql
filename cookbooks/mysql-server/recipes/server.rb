@@ -83,7 +83,7 @@ if platform_family?("debian")
                 group "mysql"
                 mode "0600"
 		notifies :run, "execute[mysql_install_db]", :immediately
-	   	notifies :start, "service[mysql]", :immediately
+	   	notifies :start, "service[mysql]", :delayed
 	end
 	
 	service "mysql" do
