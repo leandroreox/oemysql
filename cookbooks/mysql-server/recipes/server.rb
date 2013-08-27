@@ -16,6 +16,17 @@ if platform_family?("debian")
 	# Using Ruby Variables 
 	cache = { :dir => "/var/cache/local/preseeding"}
  
+
+        # Using Ruby arrays 
+        [serverbag['data_dir'], cache[:dir]].each do |dir|
+                directory dir do
+                        owner "mysql"
+                        group "mysql"
+                        mode "0750"
+                        recursive true
+                end
+        end
+
 	#coping secret key file to be used for root passwd
 	cookbook_file "my_secret_key" do
         	path "/tmp/my_secret_key"
@@ -42,16 +53,6 @@ if platform_family?("debian")
                 notifies :start, "service[mysql]", :immediately
         end
 
-
-        # Using Ruby arrays 
-        [serverbag['data_dir'], cache[:dir]].each do |dir|
-                directory dir do
-                        owner "mysql"
-                        group "mysql"
-                        mode "0750"
-                        recursive true
-                end
-        end
 
 	execute "reload apparmor" do
 		command "invoke-rc.d apparmor reload"
