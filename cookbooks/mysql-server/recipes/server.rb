@@ -34,10 +34,8 @@ if platform_family?("debian")
 	end
 
 	serverbag = Chef::DataBagItem.load("mysqlbag", "mysql_server")
-	#p serverbag['secret_path']
 	mysql_secret = Chef::EncryptedDataBagItem.load_secret("#{serverbag['secret_path']}")
 	mysql_creds = Chef::EncryptedDataBagItem.load("passwords", "mysql", mysql_secret)
-	p mysql_creds['root_pass']
 
 	template "/var/cache/local/preseeding/mysql-server.seed" do
 		source "mysql-server.seed.erb"
