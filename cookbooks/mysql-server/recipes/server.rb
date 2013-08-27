@@ -16,7 +16,6 @@ if platform_family?("debian")
 	# Using Ruby Variables 
 	cache = { :dir => "/var/cache/local/preseeding"}
  
-
         # Using Ruby arrays 
         [serverbag['data_dir'], cache[:dir]].each do |dir|
                 directory dir do
@@ -34,11 +33,18 @@ if platform_family?("debian")
         	action :create
 	end
 
+	serverbag = Chef::DataBagItem.load("mysqlbag", "mysql_server")
+	#p serverbag['secret_path']
+	mysql_secret = Chef::EncryptedDataBagItem.load_secret("#{serverbag['secret_path']}")
+	mysql_creds = Chef::EncryptedDataBagItem.load("passwords", "mysql", mysql_secret)
+	p mysql_creds['root_pass']
+
 	template "/var/cache/local/preseeding/mysql-server.seed" do
 		source "mysql-server.seed.erb"
 		owner "root"
 		group "root"
 		mode "0600"
+		variables ({:mysql_root_pass => mysql_creds['root_pass']})
 		notifies :run, "execute[preseed mysql-server]", :immediately
 	end
 
@@ -50,7 +56,7 @@ if platform_family?("debian")
 
  	package serverbag['package_file'] do
                 action :install
-                notifies :start, "service[mysql]", :immediately
+                notifies :start, "service[mysql]", :delayed
         end
 
 
